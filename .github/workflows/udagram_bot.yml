@@ -2,11 +2,8 @@ name: CI
 
 on:
   push:
-    # tags:
-    #   - '*'
-    branches:
-      - 'main'
-
+    tags:
+      - '*'
 jobs:
   API-FEED:
     runs-on: ubuntu-latest
@@ -23,13 +20,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract tag version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
       - name: (1) UDAGRAM-API-FEED -- Build and push
         id: docker_build1
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:udagram-api-feed"
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-api-feed:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-api-feed:${{ steps.vars.outputs.tag }}
 
   API-USER:
     runs-on: ubuntu-latest
@@ -46,13 +47,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
+      - name: Extract tag version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
       - name: (2) UDAGRAM-API-USER -- Build and push
         id: docker_build2
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:udagram-api-user"
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-api-user:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-api-user:${{ steps.vars.outputs.tag }}
 
   REVERSE-PROXY:
     runs-on: ubuntu-latest
@@ -69,13 +74,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
+      - name: Extract tag version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
       - name: (3) UDAGRAM-REVERSE-PROXY -- Build and push
         id: docker_build3
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:udagram-reverseproxy"
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-reverseproxy:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-reverseproxy:${{ steps.vars.outputs.tag }}
 
   FRONTEND:
     runs-on: ubuntu-latest
@@ -92,10 +101,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
+      - name: Extract tag version
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+
       - name: (4) UDAGRAM-FRONTEND -- Build and push
         id: docker_build4
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:udagram-frontend"
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/udagram-frontend:${{ steps.vars.outputs.tag }}
